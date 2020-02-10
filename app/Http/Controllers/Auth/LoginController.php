@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
+use Illuminate\Http\Request;
+use Auth;
+use Illuminate\Support\Facades\Crypt;
 class LoginController extends Controller
 {
     /*
@@ -36,5 +38,17 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    public function login(Request $request)
+    {
+      $this->validate($request, [
+        'email'   => 'required|email',
+        'password' => 'required'
+      ]);
+      if (Auth::guard('web')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
+        return redirect()->intended(route('home'));
+      }
+      return back()->with('error','Incorrect email or password!');
     }
 }
